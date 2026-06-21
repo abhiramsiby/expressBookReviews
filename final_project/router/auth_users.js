@@ -40,13 +40,13 @@ regd_users.post("/login", (req,res) => {
       }
       if(authenticatedUser(username,password)){
           let accessToken=jwt.sign({
-              data:password
+              username:username
   
           },'access',{expiresIn:60*60});
           req.session.authtorization={
-              accesToken,username
+              accessToken,username
           }
-          return res.statues(200).send("User successfully logged in");
+          return res.status(200).json("User successfully logged in");
       }
       else{
           return res.status(208).json({message:"Invalid Login"});
@@ -58,7 +58,7 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   //Write your code here
   const isbn=parseInt(req.params.isbn);
   const reviewText=req.query.review;
-  const username=req.session.authtorization?.username;
+  const username=req.user?.username;
   if(!username){
     return res.status(403).json({message:"User not logged in or authorized"});
 
@@ -77,6 +77,41 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   }
 
 });
+
+//Deleting a review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const isbn = parseInt(req.params.isbn);
+    
+    // Extract the logged-in username from the session
+    const username = req.user?.username; 
+
+    // 1. Safety Check: Ensure the user is actually authenticated
+    if (!username) {
+        return res.status(403).json({ message: "User not logged in or authorized" });
+    }
+
+    const book = books[isbn];
+
+    // 2. Check if the book exists
+    if (book) {
+        // 3. Check if this specific user has actually left a review for this book
+        if (book.reviews && book.reviews[username]) {
+            
+            // Delete only this user's review key from the reviews object
+            delete book.reviews[username];
+
+            return res.status(200).json({
+                message: `Review for ISBN ${isbn} by user '${username}' has been deleted successfully.`,
+                reviews: book.reviews
+            });
+        } else {
+            return res.status(404).json({ message: `No review found for user '${username}' under this book.` });
+        }
+    } else {
+        return res.status(404).json({ message: "Book not found with this ISBN" });
+    }
+});
+
 
 module.exports.authenticated = regd_users;
 module.exports.doesExits = doesExits;

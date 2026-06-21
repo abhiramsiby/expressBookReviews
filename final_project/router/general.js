@@ -3,7 +3,7 @@ let books = require("./booksdb.js");
 let doesExits = require("./auth_users.js").doesExits;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
-let users=[];
+
 
 //Registering new User
 public_users.post("/register", (req,res) => {
@@ -63,6 +63,20 @@ public_users.get('/author/:author',function (req, res) {
 });
 
 // Get all books based on title
+public_users.get('/title/:title', function (req, res) {
+  //Write your code here
+  const title=req.params.title;
+  filteredBooks=Object.values(books).filter(book=>{
+  return book.title.toLowerCase().includes(title.toLowerCase());  })
+  if(filteredBooks.length>0){
+    booksDetails=JSON.stringify(filteredBooks,null,4);
+    return res.status(300).json({message:"books based on title"+booksDetails});
+  }
+  else{
+    return res.status(300).json({message:"No books found"});
+  }
+});
+//  Get book review
 public_users.get('/review/:isbn', function (req, res) {
   const isbn = parseInt(req.params.isbn);
   const book = books[isbn];
@@ -79,27 +93,6 @@ public_users.get('/review/:isbn', function (req, res) {
   } else {
     return res.status(300).json({ message: "Book Not available" });
   }
-});
-//  Get book review
-public_users.get('/review/:isbn',function (req, res) {
-  //Write your code here
-      const isbn=parseInt(req.params.isbn);
-      const book=books[isbn];
-      if(book){
-        const bookReview=JSON.stringify(book.reviews,null,4);
-        if(bookReview.length>0){
-          return res.status(300).json({message:"Book review"+bookReview});
-        }
-        else{
-          return res.status(300).json({message:"No Reviews post"});
-
-
-        }
-      }
-      else{
-        return res.status(300).json({message:"Book Not available"});
-      }
-      
 });
 
 module.exports.general = public_users;
