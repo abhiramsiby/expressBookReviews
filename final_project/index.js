@@ -29,7 +29,7 @@ app.use("/customer/auth/*", function auth(req,res,next){
         });
     }
     else{
-        returnres.status(403).json({message:"User not logged in"});
+        return res.status(403).json({message:"User not logged in"});
     }
 
 //Write the authenication mechanism here

@@ -34,10 +34,10 @@ public_users.get('/',async function (req, res) {
       });
     };
     const bookDetails=await fetchBooksAsync();
-    return res.status(200).json({message:"Available Books"+bookDetails});
+    return res.status(200).json({message:"Available Books",book:bookDetails});
   }
   catch(error){
-    return res.status(500).json({message:"Erorr Fetching book-list"});
+    return res.status(404).json({message:"Erorr Fetching book-list"});
   }
 });
 
@@ -53,15 +53,14 @@ public_users.get('/isbn/:isbn',async function (req, res) {
           resolve(book);
         }
         else{
-          reject(new Error("Book not found"));
-        }
+            reject(new Error(`No book found matching ISBN: '${isbn}'`));        }
       });
     };
     const bookDetails=await fetchBookByIsbn(isbn);
-    return res.status(300).json({message:"The book Details is\n" +booksDetails});
+    return res.status(200).json({message:"The book Details is\n" +booksDetails});
   }
   catch(error){
-    return res.status(300).json({message: "No book found"});
+    return res.status(404).json({message: "No book found"});
 
   }
  });
@@ -83,8 +82,7 @@ public_users.get('/author/:author', async function (req, res) {
         if (filteredBooks.length > 0) {
           resolve(filteredBooks); // Pass matching books back on success
         } else {
-          reject(new Error(`No books found written by author '${targetAuthor}'`)); // Fail state
-        }
+            reject(new Error(`No books found in our repository written by the author: '${authorName}'`));        }
       });
     };
 
@@ -144,15 +142,15 @@ public_users.get('/title/:title', async function (req, res) {
   }
 });
 //  Get book review
-public_users.get('/review/:isbn', function (req, res) {
-  const isbn = parseInt(req.params.isbn);
+public_users.get('/review', function (req, res) {
+  const isbn = parseInt(req.body.isbn);
   const book = books[isbn];
 
   if (book) {
     // Check if the actual object has any keys inside it
     if (Object.keys(book.reviews).length > 0) {
       const bookReview = JSON.stringify(book.reviews, null, 4);
-      return res.status(300).json({ message: "Book review:\n" + bookReview });
+      return res.status(300).json({ message: "Book review:\n" ,review:bookReview });
     } else {
       // This will now execute perfectly when there are zero reviews!
       return res.status(300).json({ message: "No Reviews posted" });

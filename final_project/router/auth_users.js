@@ -54,22 +54,23 @@ regd_users.post("/login", (req,res) => {
 });
 
 // Add a book review
-regd_users.put("/auth/review/:isbn", (req, res) => {
+regd_users.put("/auth/review", (req, res) => {
   //Write your code here
-  const isbn=parseInt(req.params.isbn);
-  const reviewText=req.query.review;
+  const isbn=parseInt(req.body.isbn);
+  const reviewText=req.body.review;
   const username=req.user?.username;
   if(!username){
     return res.status(403).json({message:"User not logged in or authorized"});
 
   }
   if(!reviewText){
-    return res.status(400).json({message:"Review teext is required"});
+    return res.status(400).json({message:"Review text is required"});
   }
   const book=books[isbn];
   if(book){
     book.reviews[username]=reviewText;
-    return res.status(200).json({message: `Review for ISBN ${isbn} by user '${username}' has been successfully added/updated.`});
+    return res.status(200).json({message: `Review for ISBN ${isbn} by user '${username}' has been successfully added/updated.`,
+    review:reviewText});
 
   }
   else{
@@ -79,8 +80,8 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
 });
 
 //Deleting a review
-regd_users.delete("/auth/review/:isbn", (req, res) => {
-    const isbn = parseInt(req.params.isbn);
+regd_users.delete("/auth/review", (req, res) => {
+    const isbn = parseInt(req.body.isbn);
     
     // Extract the logged-in username from the session
     const username = req.user?.username; 
